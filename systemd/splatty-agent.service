@@ -1,0 +1,19 @@
+[Unit]
+Description=Splatty host metrics agent
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=splatty
+EnvironmentFile=/etc/splatty-agent.env
+ExecStart=/usr/local/bin/splatty-agent
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/proc /sys
+
+[Install]
+WantedBy=multi-user.target
