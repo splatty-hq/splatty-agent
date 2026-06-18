@@ -36,8 +36,10 @@ func main() {
 	ticker := time.NewTicker(cfg.Interval)
 	defer ticker.Stop()
 
+	seenErrors := map[string]bool{}
+
 	for {
-		runCycle(cfg, collectors, t)
+		runCycle(cfg, collectors, t, seenErrors)
 		select {
 		case <-ticker.C:
 		case <-sigCh:
@@ -47,12 +49,16 @@ func main() {
 	}
 }
 
-func runCycle(cfg config, collectors []collector, t *transport) {
+func runCycle(cfg config, collectors []collector, t *transport, seenErrors map[string]bool) {
 	b := batch{Host: cfg.Host, Timestamp: time.Now().UTC()}
 	for _, c := range collectors {
 		ms, err := c.collect()
 		if err != nil {
-			log.Printf("collect error: %v", err)
+			msg := err.Error()
+			if !seenErrors[msg] {
+				log.Printf("collect error (logging once): %v", err)
+				seenErrors[msg] = true
+			}
 			continue
 		}
 		b.Metrics = append(b.Metrics, ms...)
