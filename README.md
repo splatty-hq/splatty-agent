@@ -49,15 +49,18 @@ Then `systemctl enable --now splatty-agent`.
 
 | Metric | Tags | Linux | macOS |
 |---|---|:-:|:-:|
-| `cpu.usage_percent` | — | ✅ `/proc/stat` | — |
+| `cpu.usage_percent` | — | ✅ `/proc/stat` | ✅ `top -l 2 -n 0 -s 1` |
 | `mem.total_bytes` | — | ✅ `/proc/meminfo` | ✅ `hw.memsize` |
-| `mem.available_bytes`, `mem.used_bytes` | — | ✅ `/proc/meminfo` | — |
+| `mem.used_bytes` | — | ✅ `/proc/meminfo` | ✅ `vm_stat` (active + wired + compressor) |
+| `mem.available_bytes` | — | ✅ `/proc/meminfo` | ✅ `vm_stat` (free + inactive + speculative) |
 | `swap.total_bytes`, `swap.free_bytes` | — | ✅ `/proc/meminfo` | ✅ `vm.swapusage` |
 | `swap.used_bytes` | — | — | ✅ `vm.swapusage` |
 | `load.1`, `load.5`, `load.15` | — | ✅ `/proc/loadavg` | ✅ `vm.loadavg` |
 | `disk.total_bytes`, `disk.used_bytes`, `disk.free_bytes` | `mount` | ✅ `statfs` | ✅ `statfs` |
 | `net.rx_bytes_per_sec`, `net.tx_bytes_per_sec` | `iface` | ✅ `/proc/net/dev` | — |
 
-CPU usage % on macOS and per-interface network counters on macOS require Mach
-`host_statistics()` and `net.link.generic.ifmibdata` respectively — both reachable only via
-cgo or significantly more sysctl gymnastics than this agent currently does.
+On macOS, CPU + used/available memory aren't reachable through sysctl; the only sources are
+the Mach `host_statistics` API (cgo-only) or the bundled tools. The agent shells out to
+`top` (CPU sampling blocks for ~1s) and `vm_stat` instead, both of which ship with every
+macOS install. Per-interface network counters on macOS would need
+`net.link.generic.ifmibdata` row-walking — not done yet.
