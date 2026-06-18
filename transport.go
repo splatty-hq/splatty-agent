@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -19,12 +20,22 @@ func (t *transport) send(b batch) error {
 	if err != nil {
 		return err
 	}
-	req, err := http.NewRequest(http.MethodPost, t.url, bytes.NewReader(payload))
+	var buf bytes.Buffer
+	gz := gzip.NewWriter(&buf)
+	if _, err := gz.Write(payload); err != nil {
+		return err
+	}
+	if err := gz.Close(); err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, t.url, &buf)
 	if err != nil {
 		return err
 	}
 	req.Header.Set("Authorization", "Bearer "+t.key)
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Encoding", "gzip")
 	req.Header.Set("User-Agent", "splatty-agent/0.1")
 
 	resp, err := t.client.Do(req)
