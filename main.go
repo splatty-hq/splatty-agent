@@ -25,9 +25,17 @@ func main() {
 	}
 
 	t := &transport{
-		url:    cfg.URL,
-		key:    cfg.Key,
-		client: &http.Client{Timeout: cfg.HTTPTimeout},
+		url: cfg.URL,
+		key: cfg.Key,
+		client: &http.Client{
+			Timeout: cfg.HTTPTimeout,
+			Transport: &http.Transport{
+				MaxIdleConns:        4,
+				MaxIdleConnsPerHost: 2,
+				IdleConnTimeout:     90 * time.Second,
+				TLSHandshakeTimeout: 10 * time.Second,
+			},
+		},
 	}
 
 	sigCh := make(chan os.Signal, 1)
