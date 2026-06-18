@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -24,24 +22,4 @@ func parseLoadavg(s string) (load1, load5, load15 float64, err error) {
 		return
 	}
 	return
-}
-
-type loadCollector struct {
-	procRoot string
-}
-
-func (l *loadCollector) collect() ([]metric, error) {
-	b, err := os.ReadFile(filepath.Join(l.procRoot, "loadavg"))
-	if err != nil {
-		return nil, err
-	}
-	one, five, fifteen, err := parseLoadavg(string(b))
-	if err != nil {
-		return nil, err
-	}
-	return []metric{
-		{Name: "load.1", Value: one},
-		{Name: "load.5", Value: five},
-		{Name: "load.15", Value: fifteen},
-	}, nil
 }

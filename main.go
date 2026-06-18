@@ -17,11 +17,11 @@ func main() {
 	log.Printf("splatty-agent starting host=%s interval=%v url=%s", cfg.Host, cfg.Interval, cfg.URL)
 
 	collectors := []collector{
-		&cpuCollector{procRoot: cfg.ProcRoot},
-		&memCollector{procRoot: cfg.ProcRoot},
-		&loadCollector{procRoot: cfg.ProcRoot},
-		&diskCollector{mounts: cfg.DiskMounts},
-		&netCollector{procRoot: cfg.ProcRoot},
+		newCPUCollector(cfg),
+		newMemCollector(cfg),
+		newLoadCollector(cfg),
+		newDiskCollector(cfg),
+		newNetCollector(cfg),
 	}
 
 	t := &transport{

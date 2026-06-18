@@ -8,6 +8,10 @@ type diskCollector struct {
 	mounts []string
 }
 
+func newDiskCollector(cfg config) collector {
+	return &diskCollector{mounts: cfg.DiskMounts}
+}
+
 func (d *diskCollector) collect() ([]metric, error) {
 	var out []metric
 	for _, mount := range d.mounts {

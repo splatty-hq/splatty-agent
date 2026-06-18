@@ -1,7 +1,9 @@
 # splatty-agent
 
-Single static Go binary. Reads host metrics from `/proc` + `/sys` and POSTs them to a Splatty
-metrics intake. Stdlib only.
+Single static Go binary. Reads host metrics and POSTs them to a Splatty metrics intake.
+Builds for **Linux** (full coverage via `/proc`) and **macOS** (load, mem total, swap, disk
+via `sysctl` + `statfs`). Pure Go, no cgo. The only non-stdlib dep is
+[`golang.org/x/sys/unix`](https://pkg.go.dev/golang.org/x/sys/unix) for raw sysctl on Darwin.
 
 ## Env
 
@@ -45,11 +47,17 @@ Then `systemctl enable --now splatty-agent`.
 
 ## Metrics emitted
 
-| Name | Tags | Notes |
-|------|------|-------|
-| `cpu.usage_percent` | — | computed from two `/proc/stat` reads |
-| `mem.total_bytes`, `mem.available_bytes`, `mem.used_bytes` | — | from `/proc/meminfo` |
-| `swap.total_bytes`, `swap.free_bytes` | — | from `/proc/meminfo` |
-| `load.1`, `load.5`, `load.15` | — | from `/proc/loadavg` |
-| `disk.total_bytes`, `disk.used_bytes`, `disk.free_bytes` | `mount` | per `statfs` of each configured mount |
-| `net.rx_bytes_per_sec`, `net.tx_bytes_per_sec` | `iface` | computed from two `/proc/net/dev` reads |
+| Metric | Tags | Linux | macOS |
+|---|---|:-:|:-:|
+| `cpu.usage_percent` | — | ✅ `/proc/stat` | — |
+| `mem.total_bytes` | — | ✅ `/proc/meminfo` | ✅ `hw.memsize` |
+| `mem.available_bytes`, `mem.used_bytes` | — | ✅ `/proc/meminfo` | — |
+| `swap.total_bytes`, `swap.free_bytes` | — | ✅ `/proc/meminfo` | ✅ `vm.swapusage` |
+| `swap.used_bytes` | — | — | ✅ `vm.swapusage` |
+| `load.1`, `load.5`, `load.15` | — | ✅ `/proc/loadavg` | ✅ `vm.loadavg` |
+| `disk.total_bytes`, `disk.used_bytes`, `disk.free_bytes` | `mount` | ✅ `statfs` | ✅ `statfs` |
+| `net.rx_bytes_per_sec`, `net.tx_bytes_per_sec` | `iface` | ✅ `/proc/net/dev` | — |
+
+CPU usage % on macOS and per-interface network counters on macOS require Mach
+`host_statistics()` and `net.link.generic.ifmibdata` respectively — both reachable only via
+cgo or significantly more sysctl gymnastics than this agent currently does.

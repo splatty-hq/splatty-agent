@@ -3,11 +3,8 @@ package main
 import (
 	"bufio"
 	"io"
-	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type netStat struct {
@@ -45,45 +42,4 @@ func parseNetDev(r io.Reader) map[string]netStat {
 		out[iface] = netStat{rx: rx, tx: tx}
 	}
 	return out
-}
-
-type netCollector struct {
-	procRoot string
-	prev     map[string]netStat
-	prevTime time.Time
-}
-
-func (n *netCollector) collect() ([]metric, error) {
-	f, err := os.Open(filepath.Join(n.procRoot, "net", "dev"))
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	cur := parseNetDev(f)
-	now := time.Now()
-	prev := n.prev
-	prevTime := n.prevTime
-	n.prev = cur
-	n.prevTime = now
-	if prev == nil {
-		return nil, nil
-	}
-	dt := now.Sub(prevTime).Seconds()
-	if dt <= 0 {
-		return nil, nil
-	}
-	var out []metric
-	for iface, s := range cur {
-		p, ok := prev[iface]
-		if !ok {
-			continue
-		}
-		tags := map[string]string{"iface": iface}
-		out = append(out,
-			metric{Name: "net.rx_bytes_per_sec", Value: float64(s.rx-p.rx) / dt, Tags: tags},
-			metric{Name: "net.tx_bytes_per_sec", Value: float64(s.tx-p.tx) / dt, Tags: tags},
-		)
-	}
-	return out, nil
 }
