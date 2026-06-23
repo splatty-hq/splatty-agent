@@ -9,9 +9,8 @@ via `sysctl` + `statfs`). Pure Go, no cgo. The only non-stdlib dep is
 
 | Var | Required | Default | Notes |
 |-----|----------|---------|-------|
-| `SPLATTY_URL` | yes | — | e.g. `https://splatty.example.com` |
-| `PROJECT_ID` | yes | — | numeric project id |
-| `PROJECT_KEY` | yes | — | project `ingest_key` |
+| `SPLATTY_DSN` | yes | — | hex key from the project settings page |
+| `SPLATTY_URL` | no | `https://splatty.k0va1.dev` | server URL |
 | `SPLATTY_HOST` | no | hostname | tag value for `host` |
 | `INTERVAL_SECS` | no | `15` | collection interval |
 | `PROCFS_ROOT` | no | `/proc` | set to `/host/proc` in a container |
@@ -24,23 +23,60 @@ via `sysctl` + `statfs`). Pure Go, no cgo. The only non-stdlib dep is
 docker run -d --name splatty-agent --restart unless-stopped \
   -v /proc:/host/proc:ro -v /sys:/host/sys:ro \
   -e PROCFS_ROOT=/host/proc -e SYSFS_ROOT=/host/sys \
-  -e SPLATTY_URL=https://splatty.example.com \
-  -e PROJECT_ID=<id> -e PROJECT_KEY=<key> \
-  ghcr.io/k0va1/splatty-agent:latest
+  -e SPLATTY_DSN=<hex> \
+  -e SPLATTY_URL=https://splatty.k0va1.dev \
+  ghcr.io/splatty-hq/splatty-agent:latest
 ```
 
 Host `/proc` and `/sys` must be mounted into the container; otherwise the agent measures the
 container, not the host.
 
-## Run (systemd)
+## Install (prebuilt binary)
 
-Copy the binary to `/usr/local/bin/splatty-agent` and `systemd/splatty-agent.service` to
-`/etc/systemd/system/`. Create `/etc/splatty-agent.env`:
+Released for `linux/amd64`, `linux/arm64`, `darwin/amd64`, `darwin/arm64`. The install
+script picks the right asset, verifies its `.sha256`, and drops the binary at
+`/usr/local/bin/splatty-agent`.
+
+Binary only:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/splatty-hq/splatty-agent/master/install.sh | sh
+```
+
+Linux + systemd, all-in-one (binary + service that survives reboot):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/splatty-hq/splatty-agent/master/install.sh \
+  | sudo SPLATTY_DSN=<hex> sh
+```
+
+When `SPLATTY_DSN` is set on a Linux host with systemd, the script also creates a
+`splatty` system user, writes `/etc/splatty-agent.env` (`0640 root:splatty`), installs
+`splatty-agent.service`, and `systemctl enable --now`s it. Without it, only the binary
+is installed.
+
+Optional overrides:
+
+```bash
+VERSION=v0.1.0           # pin a release tag (default: latest)
+INSTALL_DIR=$HOME/.local/bin   # binary destination (default: /usr/local/bin)
+SPLATTY_HOST=...         # passed through to the service env file
+INTERVAL_SECS=...
+DISK_MOUNTS=...
+```
+
+Check the service: `systemctl status splatty-agent` · logs: `journalctl -u splatty-agent -f`.
+
+## Run (systemd, manual)
+
+If you'd rather not run the script, the unit file ships in the repo. Copy the binary to
+`/usr/local/bin/splatty-agent` and `systemd/splatty-agent.service` to `/etc/systemd/system/`.
+Create the `splatty` user (`useradd --system --no-create-home --shell /usr/sbin/nologin splatty`)
+and write `/etc/splatty-agent.env`:
 
 ```
-SPLATTY_URL=https://splatty.example.com
-PROJECT_ID=1
-PROJECT_KEY=xxxxxxxxxxxx
+SPLATTY_DSN=<hex>
+SPLATTY_URL=https://splatty.k0va1.dev
 ```
 
 Then `systemctl enable --now splatty-agent`.

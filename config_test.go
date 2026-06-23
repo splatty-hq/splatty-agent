@@ -4,19 +4,31 @@ import (
 	"testing"
 )
 
-func TestLoadConfigRequiresMandatoryVars(t *testing.T) {
-	t.Setenv("SPLATTY_URL", "")
-	t.Setenv("PROJECT_ID", "")
-	t.Setenv("PROJECT_KEY", "")
+func TestLoadConfigRequiresDSN(t *testing.T) {
+	t.Setenv("SPLATTY_DSN", "")
 	if _, err := loadConfig(); err == nil {
 		t.Fatal("expected error")
 	}
 }
 
-func TestLoadConfigBuildsURLAndDefaults(t *testing.T) {
-	t.Setenv("SPLATTY_URL", "https://splatty.example.com/")
-	t.Setenv("PROJECT_ID", "42")
-	t.Setenv("PROJECT_KEY", "k")
+func TestLoadConfigDefaultsURL(t *testing.T) {
+	t.Setenv("SPLATTY_DSN", "abc123def456")
+	t.Setenv("SPLATTY_URL", "")
+	cfg, err := loadConfig()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.URL != "https://splatty.k0va1.dev/api/metrics" {
+		t.Errorf("URL=%q", cfg.URL)
+	}
+	if cfg.Key != "abc123def456" {
+		t.Errorf("Key=%q", cfg.Key)
+	}
+}
+
+func TestLoadConfigCustomURL(t *testing.T) {
+	t.Setenv("SPLATTY_DSN", "abc123")
+	t.Setenv("SPLATTY_URL", "http://localhost:3000/")
 	t.Setenv("SPLATTY_HOST", "node-1")
 	t.Setenv("DISK_MOUNTS", "/, /data")
 
@@ -24,7 +36,7 @@ func TestLoadConfigBuildsURLAndDefaults(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if cfg.URL != "https://splatty.example.com/api/42/metrics" {
+	if cfg.URL != "http://localhost:3000/api/metrics" {
 		t.Errorf("URL=%q", cfg.URL)
 	}
 	if cfg.Host != "node-1" {
@@ -38,10 +50,16 @@ func TestLoadConfigBuildsURLAndDefaults(t *testing.T) {
 	}
 }
 
+func TestLoadConfigBadURL(t *testing.T) {
+	t.Setenv("SPLATTY_DSN", "abc123")
+	t.Setenv("SPLATTY_URL", "not-a-url")
+	if _, err := loadConfig(); err == nil {
+		t.Fatal("expected error")
+	}
+}
+
 func TestLoadConfigBadInterval(t *testing.T) {
-	t.Setenv("SPLATTY_URL", "https://x")
-	t.Setenv("PROJECT_ID", "1")
-	t.Setenv("PROJECT_KEY", "k")
+	t.Setenv("SPLATTY_DSN", "abc123")
 	t.Setenv("INTERVAL_SECS", "nope")
 	if _, err := loadConfig(); err == nil {
 		t.Fatal("expected error")

@@ -2,30 +2,36 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 )
 
+const defaultSplattyURL = "https://splatty.k0va1.dev"
+
 type config struct {
-	URL        string
-	ProjectID  string
-	Key        string
-	Host       string
-	Interval   time.Duration
-	ProcRoot   string
-	SysRoot    string
-	DiskMounts []string
+	URL         string
+	Key         string
+	Host        string
+	Interval    time.Duration
+	ProcRoot    string
+	SysRoot     string
+	DiskMounts  []string
 	HTTPTimeout time.Duration
 }
 
 func loadConfig() (config, error) {
-	baseURL := strings.TrimRight(os.Getenv("SPLATTY_URL"), "/")
-	projectID := os.Getenv("PROJECT_ID")
-	key := os.Getenv("PROJECT_KEY")
-	if baseURL == "" || projectID == "" || key == "" {
-		return config{}, fmt.Errorf("SPLATTY_URL, PROJECT_ID and PROJECT_KEY are required")
+	key := strings.TrimSpace(os.Getenv("SPLATTY_DSN"))
+	if key == "" {
+		return config{}, fmt.Errorf("SPLATTY_DSN is required (the key from your project settings)")
+	}
+
+	base := strings.TrimRight(envOr("SPLATTY_URL", defaultSplattyURL), "/")
+	u, perr := url.Parse(base)
+	if perr != nil || u.Scheme == "" || u.Host == "" {
+		return config{}, fmt.Errorf("SPLATTY_URL %q is not a valid URL", base)
 	}
 
 	intervalSecs := 15
@@ -45,8 +51,7 @@ func loadConfig() (config, error) {
 	mounts := splitCSV(envOr("DISK_MOUNTS", "/"))
 
 	return config{
-		URL:         fmt.Sprintf("%s/api/%s/metrics", baseURL, projectID),
-		ProjectID:   projectID,
+		URL:         fmt.Sprintf("%s/api/metrics", base),
 		Key:         key,
 		Host:        host,
 		Interval:    time.Duration(intervalSecs) * time.Second,
