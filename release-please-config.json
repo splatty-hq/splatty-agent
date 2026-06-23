@@ -1,0 +1,10 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "go",
+      "package-name": "splatty-agent",
+      "include-component-in-tag": false,
+      "include-v-in-tag": true
+    }
+  }
+}
