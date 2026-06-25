@@ -90,7 +90,7 @@ Then `systemctl enable --now splatty-agent`.
 | `mem.used_bytes` | — | ✅ `/proc/meminfo` | ✅ `vm_stat` (active + wired + compressor) |
 | `mem.available_bytes` | — | ✅ `/proc/meminfo` | ✅ `vm_stat` (free + inactive + speculative) |
 | `swap.total_bytes`, `swap.free_bytes` | — | ✅ `/proc/meminfo` | ✅ `vm.swapusage` |
-| `swap.used_bytes` | — | — | ✅ `vm.swapusage` |
+| `swap.used_bytes` | — | ✅ `SwapTotal - SwapFree` | ✅ `vm.swapusage` |
 | `load.1`, `load.5`, `load.15` | — | ✅ `/proc/loadavg` | ✅ `vm.loadavg` |
 | `disk.total_bytes`, `disk.used_bytes`, `disk.free_bytes` | `mount` | ✅ `statfs` | ✅ `statfs` |
 | `net.rx_bytes_per_sec`, `net.tx_bytes_per_sec` | `iface` | ✅ `/proc/net/dev` | — |

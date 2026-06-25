@@ -41,5 +41,10 @@ func (m *memCollector) collect() ([]metric, error) {
 	if v, ok := info["SwapFree"]; ok {
 		out = append(out, metric{Name: "swap.free_bytes", Value: float64(v)})
 	}
+	if total, ok := info["SwapTotal"]; ok {
+		if free, ok2 := info["SwapFree"]; ok2 {
+			out = append(out, metric{Name: "swap.used_bytes", Value: float64(total - free)})
+		}
+	}
 	return out, nil
 }
