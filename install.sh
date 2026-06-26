@@ -4,16 +4,16 @@
 # Usage:
 #   curl -fsSL https://raw.githubusercontent.com/splatty-hq/splatty-agent/master/install.sh | sh
 #
-# On Linux with systemd, if SPLATTY_DSN is set in the calling env, the script
+# On Linux with systemd, if SPLATTY_SERVER_TOKEN is set in the calling env, the script
 # also installs and enables a systemd service so the agent survives reboots:
 #
 #   curl -fsSL https://raw.githubusercontent.com/splatty-hq/splatty-agent/master/install.sh \
-#     | sudo SPLATTY_DSN=<hex> sh
+#     | sudo SPLATTY_SERVER_TOKEN=<token> sh
 #
 # Env vars:
 #   VERSION       release tag to install (default: latest)
 #   INSTALL_DIR   install destination (default: /usr/local/bin)
-#   SPLATTY_DSN   if set on Linux, the systemd service is installed and started
+#   SPLATTY_SERVER_TOKEN   if set on Linux, the systemd service is installed and started
 #   SPLATTY_URL   server URL (default: https://splatty.k0va1.dev), passed through
 #   SPLATTY_HOST, INTERVAL_SECS, DISK_MOUNTS   optional, passed through to the
 #                 service env file when present
@@ -76,14 +76,14 @@ echo "installed $dest"
 if [ "$os" != "linux" ]; then
   exit 0
 fi
-if [ -z "${SPLATTY_DSN:-}" ]; then
+if [ -z "${SPLATTY_SERVER_TOKEN:-}" ]; then
   cat <<EOF
 
-Skipping service setup (SPLATTY_DSN not set).
+Skipping service setup (SPLATTY_SERVER_TOKEN not set).
 To install the systemd service, re-run with it, e.g.:
 
   curl -fsSL https://raw.githubusercontent.com/${REPO}/master/install.sh \\
-    | sudo SPLATTY_DSN=<hex> sh
+    | sudo SPLATTY_SERVER_TOKEN=<token> sh
 EOF
   exit 0
 fi
@@ -103,7 +103,7 @@ fi
 env_file="/etc/splatty-agent.env"
 tmp_env="$tmp/splatty-agent.env"
 {
-  echo "SPLATTY_DSN=${SPLATTY_DSN}"
+  echo "SPLATTY_SERVER_TOKEN=${SPLATTY_SERVER_TOKEN}"
   [ -n "${SPLATTY_URL:-}" ] && echo "SPLATTY_URL=${SPLATTY_URL}"
   [ -n "${SPLATTY_HOST:-}" ] && echo "SPLATTY_HOST=${SPLATTY_HOST}"
   [ -n "${INTERVAL_SECS:-}" ] && echo "INTERVAL_SECS=${INTERVAL_SECS}"

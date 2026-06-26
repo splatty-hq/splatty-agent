@@ -10,22 +10,25 @@ import (
 )
 
 const defaultSplattyURL = "https://splatty.k0va1.dev"
+const defaultDockerSocket = "/var/run/docker.sock"
 
 type config struct {
-	URL         string
-	Key         string
-	Host        string
-	Interval    time.Duration
-	ProcRoot    string
-	SysRoot     string
-	DiskMounts  []string
-	HTTPTimeout time.Duration
+	URL           string
+	Key           string
+	Host          string
+	Interval      time.Duration
+	ProcRoot      string
+	SysRoot       string
+	DiskMounts    []string
+	HTTPTimeout   time.Duration
+	DockerEnabled bool
+	DockerSocket  string
 }
 
 func loadConfig() (config, error) {
-	key := strings.TrimSpace(os.Getenv("SPLATTY_DSN"))
+	key := strings.TrimSpace(os.Getenv("SPLATTY_SERVER_TOKEN"))
 	if key == "" {
-		return config{}, fmt.Errorf("SPLATTY_DSN is required (the key from your project settings)")
+		return config{}, fmt.Errorf("SPLATTY_SERVER_TOKEN is required (the agent token from the server's settings page)")
 	}
 
 	base := strings.TrimRight(envOr("SPLATTY_URL", defaultSplattyURL), "/")
@@ -51,14 +54,16 @@ func loadConfig() (config, error) {
 	mounts := splitCSV(envOr("DISK_MOUNTS", "/"))
 
 	return config{
-		URL:         fmt.Sprintf("%s/api/metrics", base),
-		Key:         key,
-		Host:        host,
-		Interval:    time.Duration(intervalSecs) * time.Second,
-		ProcRoot:    envOr("PROCFS_ROOT", "/proc"),
-		SysRoot:     envOr("SYSFS_ROOT", "/sys"),
-		DiskMounts:  mounts,
-		HTTPTimeout: 10 * time.Second,
+		URL:           fmt.Sprintf("%s/api/metrics", base),
+		Key:           key,
+		Host:          host,
+		Interval:      time.Duration(intervalSecs) * time.Second,
+		ProcRoot:      envOr("PROCFS_ROOT", "/proc"),
+		SysRoot:       envOr("SYSFS_ROOT", "/sys"),
+		DiskMounts:    mounts,
+		HTTPTimeout:   10 * time.Second,
+		DockerEnabled: envBool("DOCKER_ENABLED", false),
+		DockerSocket:  envOr("DOCKER_SOCKET", defaultDockerSocket),
 	}, nil
 }
 
@@ -67,6 +72,18 @@ func envOr(k, def string) string {
 		return v
 	}
 	return def
+}
+
+func envBool(k string, def bool) bool {
+	v := strings.ToLower(strings.TrimSpace(os.Getenv(k)))
+	switch v {
+	case "":
+		return def
+	case "1", "true", "yes", "on":
+		return true
+	default:
+		return false
+	}
 }
 
 func splitCSV(s string) []string {

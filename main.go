@@ -23,6 +23,9 @@ func main() {
 		newDiskCollector(cfg),
 		newNetCollector(cfg),
 	}
+	if cfg.DockerEnabled {
+		collectors = append(collectors, newDockerCollector(cfg))
+	}
 
 	t := &transport{
 		url: cfg.URL,

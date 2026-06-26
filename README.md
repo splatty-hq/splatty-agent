@@ -9,13 +9,15 @@ via `sysctl` + `statfs`). Pure Go, no cgo. The only non-stdlib dep is
 
 | Var | Required | Default | Notes |
 |-----|----------|---------|-------|
-| `SPLATTY_DSN` | yes | — | hex key from the project settings page |
+| `SPLATTY_SERVER_TOKEN` | yes | — | agent token from the server's settings page |
 | `SPLATTY_URL` | no | `https://splatty.k0va1.dev` | server URL |
 | `SPLATTY_HOST` | no | hostname | tag value for `host` |
 | `INTERVAL_SECS` | no | `15` | collection interval |
 | `PROCFS_ROOT` | no | `/proc` | set to `/host/proc` in a container |
 | `SYSFS_ROOT` | no | `/sys` | set to `/host/sys` in a container |
 | `DISK_MOUNTS` | no | `/` | comma-separated mount paths |
+| `DOCKER_ENABLED` | no | `false` | set to `true` to collect per-container metrics |
+| `DOCKER_SOCKET` | no | `/var/run/docker.sock` | docker engine socket path |
 
 ## Run (Docker)
 
@@ -23,7 +25,7 @@ via `sysctl` + `statfs`). Pure Go, no cgo. The only non-stdlib dep is
 docker run -d --name splatty-agent --restart unless-stopped \
   -v /proc:/host/proc:ro -v /sys:/host/sys:ro \
   -e PROCFS_ROOT=/host/proc -e SYSFS_ROOT=/host/sys \
-  -e SPLATTY_DSN=<hex> \
+  -e SPLATTY_SERVER_TOKEN=<token> \
   -e SPLATTY_URL=https://splatty.k0va1.dev \
   ghcr.io/splatty-hq/splatty-agent:latest
 ```
@@ -47,10 +49,10 @@ Linux + systemd, all-in-one (binary + service that survives reboot):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/splatty-hq/splatty-agent/master/install.sh \
-  | sudo SPLATTY_DSN=<hex> sh
+  | sudo SPLATTY_SERVER_TOKEN=<token> sh
 ```
 
-When `SPLATTY_DSN` is set on a Linux host with systemd, the script also creates a
+When `SPLATTY_SERVER_TOKEN` is set on a Linux host with systemd, the script also creates a
 `splatty` system user, writes `/etc/splatty-agent.env` (`0640 root:splatty`), installs
 `splatty-agent.service`, and `systemctl enable --now`s it. Without it, only the binary
 is installed.
@@ -75,7 +77,7 @@ Create the `splatty` user (`useradd --system --no-create-home --shell /usr/sbin/
 and write `/etc/splatty-agent.env`:
 
 ```
-SPLATTY_DSN=<hex>
+SPLATTY_SERVER_TOKEN=<token>
 SPLATTY_URL=https://splatty.k0va1.dev
 ```
 
