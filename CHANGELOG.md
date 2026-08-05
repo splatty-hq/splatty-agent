@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/splatty-hq/splatty-agent/compare/v1.0.0...v1.1.0) (2026-08-05)
+
+
+### Features
+
+* docker container metrics, rename SPLATTY_DSN to SPLATTY_SERVER_TOKEN ([bd765ea](https://github.com/splatty-hq/splatty-agent/commit/bd765ea1824fd37d4507a6591187d2a88dc80d74))
+* emit swap.used_bytes on linux ([495ed36](https://github.com/splatty-hq/splatty-agent/commit/495ed366521b5b266c7e31bfc5c86fce675058e4))
+
 ## 1.0.0 (2026-06-23)
 
 
