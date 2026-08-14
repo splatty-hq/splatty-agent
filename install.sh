@@ -14,7 +14,7 @@
 #   VERSION       release tag to install (default: latest)
 #   INSTALL_DIR   install destination (default: /usr/local/bin)
 #   SPLATTY_SERVER_TOKEN   if set on Linux, the systemd service is installed and started
-#   SPLATTY_URL   server URL (default: https://splatty.k0va1.dev), passed through
+#   SPLATTY_URL   server URL (default: https://splatty.app), passed through
 #   SPLATTY_HOST, INTERVAL_SECS, DISK_MOUNTS   optional, passed through to the
 #                 service env file when present
 

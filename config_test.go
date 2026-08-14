@@ -18,7 +18,7 @@ func TestLoadConfigDefaultsURL(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if cfg.URL != "https://splatty.k0va1.dev/api/metrics" {
+	if cfg.URL != "https://splatty.app/api/metrics" {
 		t.Errorf("URL=%q", cfg.URL)
 	}
 	if cfg.Key != "abc123def456" {

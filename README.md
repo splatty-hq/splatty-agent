@@ -10,7 +10,7 @@ via `sysctl` + `statfs`). Pure Go, no cgo. The only non-stdlib dep is
 | Var | Required | Default | Notes |
 |-----|----------|---------|-------|
 | `SPLATTY_SERVER_TOKEN` | yes | — | agent token from the server's settings page |
-| `SPLATTY_URL` | no | `https://splatty.k0va1.dev` | server URL |
+| `SPLATTY_URL` | no | `https://splatty.app` | server URL |
 | `SPLATTY_HOST` | no | hostname | tag value for `host` |
 | `INTERVAL_SECS` | no | `15` | collection interval |
 | `PROCFS_ROOT` | no | `/proc` | set to `/host/proc` in a container |
@@ -26,7 +26,7 @@ docker run -d --name splatty-agent --restart unless-stopped \
   -v /proc:/host/proc:ro -v /sys:/host/sys:ro \
   -e PROCFS_ROOT=/host/proc -e SYSFS_ROOT=/host/sys \
   -e SPLATTY_SERVER_TOKEN=<token> \
-  -e SPLATTY_URL=https://splatty.k0va1.dev \
+  -e SPLATTY_URL=https://splatty.app \
   ghcr.io/splatty-hq/splatty-agent:latest
 ```
 
@@ -78,7 +78,7 @@ and write `/etc/splatty-agent.env`:
 
 ```
 SPLATTY_SERVER_TOKEN=<token>
-SPLATTY_URL=https://splatty.k0va1.dev
+SPLATTY_URL=https://splatty.app
 ```
 
 Then `systemctl enable --now splatty-agent`.
