@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const defaultSplattyURL = "https://splatty.k0va1.dev"
+const defaultSplattyURL = "https://splatty.app"
 const defaultDockerSocket = "/var/run/docker.sock"
 
 type config struct {

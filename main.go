@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,12 +10,21 @@ import (
 	"time"
 )
 
+// version is the release tag, injected at build time with
+// -ldflags "-X main.version=<tag>". Stays "dev" in local builds.
+var version = "dev"
+
 func main() {
+	if versionRequested(os.Args[1:]) {
+		fmt.Println("splatty-agent", version)
+		return
+	}
+
 	cfg, err := loadConfig()
 	if err != nil {
 		log.Fatalf("config: %v", err)
 	}
-	log.Printf("splatty-agent starting host=%s interval=%v url=%s", cfg.Host, cfg.Interval, cfg.URL)
+	log.Printf("splatty-agent %s starting host=%s interval=%v url=%s", version, cfg.Host, cfg.Interval, cfg.URL)
 
 	collectors := []collector{
 		newCPUCollector(cfg),
@@ -58,6 +68,16 @@ func main() {
 			return
 		}
 	}
+}
+
+func versionRequested(args []string) bool {
+	for _, a := range args {
+		switch a {
+		case "--version", "-version", "-v":
+			return true
+		}
+	}
+	return false
 }
 
 func runCycle(cfg config, collectors []collector, t *transport, seenErrors map[string]bool) {
