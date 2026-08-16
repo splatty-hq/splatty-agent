@@ -51,9 +51,10 @@ jobs:
           CGO_ENABLED: "0"
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
         run: |
           out="splatty-agent-${GOOS}-${GOARCH}"
-          go build -trimpath -ldflags "-s -w" -o "$out" .
+          go build -trimpath -ldflags "-s -w -X main.version=${TAG}" -o "$out" .
           shasum -a 256 "$out" > "${out}.sha256"
 
       - name: upload to release

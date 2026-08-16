@@ -69,6 +69,33 @@ DISK_MOUNTS=...
 
 Check the service: `systemctl status splatty-agent` · logs: `journalctl -u splatty-agent -f`.
 
+## Upgrade
+
+Re-run the install script, then restart the service — the script replaces the binary but
+never restarts a running agent, so the old process keeps serving until you do:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/splatty-hq/splatty-agent/master/install.sh | sudo sh
+sudo systemctl restart splatty-agent
+```
+
+Leave `SPLATTY_SERVER_TOKEN` out when upgrading. With it set, the script rewrites
+`/etc/splatty-agent.env` and the unit file, discarding anything you tuned by hand.
+
+Set `VERSION=<tag>` to pin a release, or to roll back to an earlier one.
+
+## Version
+
+Release builds are stamped with their tag via `-ldflags -X main.version=<tag>`:
+
+```bash
+splatty-agent --version   # splatty-agent v1.0.0
+```
+
+Local builds report `dev`. For images, pass `--build-arg VERSION=<tag>` to `docker build`.
+The running agent also logs its version on startup, so `journalctl -u splatty-agent` shows
+which build is live.
+
 ## Run (systemd, manual)
 
 If you'd rather not run the script, the unit file ships in the repo. Copy the binary to
