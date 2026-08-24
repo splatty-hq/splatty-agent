@@ -69,6 +69,17 @@ DISK_MOUNTS=...
 
 Check the service: `systemctl status splatty-agent` · logs: `journalctl -u splatty-agent -f`.
 
+## Install (go)
+
+Requires Go 1.25 or newer:
+
+```bash
+go install github.com/splatty-hq/splatty-agent@latest
+```
+
+The binary lands in `$(go env GOPATH)/bin`. This builds from source and sets up nothing
+else — use the install script above if you want the systemd service too.
+
 ## Upgrade
 
 Re-run the install script, then restart the service — the script replaces the binary but
@@ -92,7 +103,8 @@ Release builds are stamped with their tag via `-ldflags -X main.version=<tag>`:
 splatty-agent --version   # splatty-agent v1.0.0
 ```
 
-Local builds report `dev`. For images, pass `--build-arg VERSION=<tag>` to `docker build`.
+Builds without that flag fall back to the module version the toolchain records — the
+tag for `go install` binaries, the commit for local builds. For images, pass `--build-arg VERSION=<tag>` to `docker build`.
 The running agent also logs its version on startup, so `journalctl -u splatty-agent` shows
 which build is live.
 
@@ -109,6 +121,10 @@ SPLATTY_URL=https://splatty.app
 ```
 
 Then `systemctl enable --now splatty-agent`.
+
+## License
+
+[MIT](LICENSE)
 
 ## Metrics emitted
 

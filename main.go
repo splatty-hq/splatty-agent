@@ -6,17 +6,31 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"syscall"
 	"time"
 )
 
 // version is the release tag, injected at build time with
-// -ldflags "-X main.version=<tag>". Stays "dev" in local builds.
-var version = "dev"
+// -ldflags "-X main.version=<tag>". Empty in builds that don't set it.
+var version = ""
+
+// buildVersion reports the version to display: the injected release tag when
+// present, otherwise the module version the toolchain records — the tag for
+// `go install` builds, the commit it was built from for local ones.
+func buildVersion() string {
+	if version != "" {
+		return version
+	}
+	if bi, ok := debug.ReadBuildInfo(); ok && bi.Main.Version != "" {
+		return bi.Main.Version
+	}
+	return "unknown"
+}
 
 func main() {
 	if versionRequested(os.Args[1:]) {
-		fmt.Println("splatty-agent", version)
+		fmt.Println("splatty-agent", buildVersion())
 		return
 	}
 
@@ -24,7 +38,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("config: %v", err)
 	}
-	log.Printf("splatty-agent %s starting host=%s interval=%v url=%s", version, cfg.Host, cfg.Interval, cfg.URL)
+	log.Printf("splatty-agent %s starting host=%s interval=%v url=%s", buildVersion(), cfg.Host, cfg.Interval, cfg.URL)
 
 	collectors := []collector{
 		newCPUCollector(cfg),

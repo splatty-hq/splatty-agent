@@ -1,5 +1,5 @@
-module github.com/k0va1/splatty-agent
+module github.com/splatty-hq/splatty-agent
 
-go 1.26
+go 1.25.0
 
 require golang.org/x/sys v0.46.0
