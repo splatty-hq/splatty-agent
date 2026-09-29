@@ -45,6 +45,7 @@ func main() {
 		newMemCollector(cfg),
 		newLoadCollector(cfg),
 		newDiskCollector(cfg),
+		newDiskIOCollector(cfg),
 		newNetCollector(cfg),
 	}
 	if cfg.DockerEnabled {

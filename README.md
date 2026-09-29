@@ -138,10 +138,19 @@ Then `systemctl enable --now splatty-agent`.
 | `swap.used_bytes` | — | ✅ `SwapTotal - SwapFree` | ✅ `vm.swapusage` |
 | `load.1`, `load.5`, `load.15` | — | ✅ `/proc/loadavg` | ✅ `vm.loadavg` |
 | `disk.total_bytes`, `disk.used_bytes`, `disk.free_bytes` | `mount` | ✅ `statfs` | ✅ `statfs` |
+| `disk.read_bytes_per_sec`, `disk.write_bytes_per_sec` | `device` | ✅ `/proc/diskstats` | — |
+| `disk.read_ops_per_sec`, `disk.write_ops_per_sec` | `device` | ✅ `/proc/diskstats` | — |
 | `net.rx_bytes_per_sec`, `net.tx_bytes_per_sec` | `iface` | ✅ `/proc/net/dev` | — |
+| `net.rx_packets_per_sec`, `net.tx_packets_per_sec` | `iface` | ✅ `/proc/net/dev` | — |
 
 On macOS, CPU + used/available memory aren't reachable through sysctl; the only sources are
 the Mach `host_statistics` API (cgo-only) or the bundled tools. The agent shells out to
 `top` (CPU sampling blocks for ~1s) and `vm_stat` instead, both of which ship with every
 macOS install. Per-interface network counters on macOS would need
-`net.link.generic.ifmibdata` row-walking — not done yet.
+`net.link.generic.ifmibdata` row-walking — not done yet. Disk I/O counters on macOS sit
+behind IOKit, which needs cgo, so the darwin agent emits none.
+
+Disk I/O is reported per whole physical disk: partitions and virtual devices (`loop`,
+`dm-*`, `md*`, `zram`) are skipped so stacked devices don't count the same I/O twice. In a
+container, mount the host's `/sys` and set `SYSFS_ROOT` or the agent can't tell them apart
+and reports no disk I/O.

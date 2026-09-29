@@ -8,8 +8,10 @@ import (
 )
 
 type netStat struct {
-	rx uint64
-	tx uint64
+	rx        uint64
+	tx        uint64
+	rxPackets uint64
+	txPackets uint64
 }
 
 func parseNetDev(r io.Reader) map[string]netStat {
@@ -28,7 +30,7 @@ func parseNetDev(r io.Reader) map[string]netStat {
 		}
 		iface := strings.TrimSpace(line[:colon])
 		fields := strings.Fields(line[colon+1:])
-		if len(fields) < 9 {
+		if len(fields) < 10 {
 			continue
 		}
 		rx, err := strconv.ParseUint(fields[0], 10, 64)
@@ -39,7 +41,15 @@ func parseNetDev(r io.Reader) map[string]netStat {
 		if err != nil {
 			continue
 		}
-		out[iface] = netStat{rx: rx, tx: tx}
+		rxPackets, err := strconv.ParseUint(fields[1], 10, 64)
+		if err != nil {
+			continue
+		}
+		txPackets, err := strconv.ParseUint(fields[9], 10, 64)
+		if err != nil {
+			continue
+		}
+		out[iface] = netStat{rx: rx, tx: tx, rxPackets: rxPackets, txPackets: txPackets}
 	}
 	return out
 }
