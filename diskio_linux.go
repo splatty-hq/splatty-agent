@@ -41,24 +41,12 @@ func (d *diskIOCollector) collect() ([]metric, error) {
 		return nil, nil
 	}
 	physical := d.physicalDisks()
-	var out []metric
-	for dev, s := range cur {
+	for dev := range cur {
 		if !physical[dev] {
-			continue
+			delete(cur, dev)
 		}
-		p, ok := prev[dev]
-		if !ok || s.reads < p.reads || s.writes < p.writes || s.readSectors < p.readSectors || s.writeSectors < p.writeSectors {
-			continue
-		}
-		tags := map[string]string{"device": dev}
-		out = append(out,
-			metric{Name: "disk.read_bytes_per_sec", Value: float64((s.readSectors-p.readSectors)*diskSectorBytes) / dt, Tags: tags},
-			metric{Name: "disk.write_bytes_per_sec", Value: float64((s.writeSectors-p.writeSectors)*diskSectorBytes) / dt, Tags: tags},
-			metric{Name: "disk.read_ops_per_sec", Value: float64(s.reads-p.reads) / dt, Tags: tags},
-			metric{Name: "disk.write_ops_per_sec", Value: float64(s.writes-p.writes) / dt, Tags: tags},
-		)
 	}
-	return out, nil
+	return diskIORates(cur, prev, dt), nil
 }
 
 // physicalDisks lists whole block devices backed by hardware. Partitions never

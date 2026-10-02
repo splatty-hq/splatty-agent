@@ -1,8 +1,8 @@
 # splatty-agent
 
 Single static Go binary. Reads host metrics and POSTs them to a Splatty metrics intake.
-Builds for **Linux** (full coverage via `/proc`) and **macOS** (load, mem total, swap, disk
-via `sysctl` + `statfs`). Pure Go, no cgo. The only non-stdlib dep is
+Builds for **Linux** (full coverage via `/proc`) and **macOS** (`sysctl`, `statfs`, and the
+bundled `top`/`vm_stat`/`ioreg` tools). Pure Go, no cgo. The only non-stdlib dep is
 [`golang.org/x/sys/unix`](https://pkg.go.dev/golang.org/x/sys/unix) for raw sysctl on Darwin.
 
 ## Env
@@ -138,17 +138,19 @@ Then `systemctl enable --now splatty-agent`.
 | `swap.used_bytes` | — | ✅ `SwapTotal - SwapFree` | ✅ `vm.swapusage` |
 | `load.1`, `load.5`, `load.15` | — | ✅ `/proc/loadavg` | ✅ `vm.loadavg` |
 | `disk.total_bytes`, `disk.used_bytes`, `disk.free_bytes` | `mount` | ✅ `statfs` | ✅ `statfs` |
-| `disk.read_bytes_per_sec`, `disk.write_bytes_per_sec` | `device` | ✅ `/proc/diskstats` | — |
-| `disk.read_ops_per_sec`, `disk.write_ops_per_sec` | `device` | ✅ `/proc/diskstats` | — |
-| `net.rx_bytes_per_sec`, `net.tx_bytes_per_sec` | `iface` | ✅ `/proc/net/dev` | — |
-| `net.rx_packets_per_sec`, `net.tx_packets_per_sec` | `iface` | ✅ `/proc/net/dev` | — |
+| `disk.read_bytes_per_sec`, `disk.write_bytes_per_sec` | `device` | ✅ `/proc/diskstats` | ✅ `ioreg` |
+| `disk.read_ops_per_sec`, `disk.write_ops_per_sec` | `device` | ✅ `/proc/diskstats` | ✅ `ioreg` |
+| `net.rx_bytes_per_sec`, `net.tx_bytes_per_sec` | `iface` | ✅ `/proc/net/dev` | ✅ `NET_RT_IFLIST2` |
+| `net.rx_packets_per_sec`, `net.tx_packets_per_sec` | `iface` | ✅ `/proc/net/dev` | ✅ `NET_RT_IFLIST2` |
 
 On macOS, CPU + used/available memory aren't reachable through sysctl; the only sources are
 the Mach `host_statistics` API (cgo-only) or the bundled tools. The agent shells out to
 `top` (CPU sampling blocks for ~1s) and `vm_stat` instead, both of which ship with every
-macOS install. Per-interface network counters on macOS would need
-`net.link.generic.ifmibdata` row-walking — not done yet. Disk I/O counters on macOS sit
-behind IOKit, which needs cgo, so the darwin agent emits none.
+macOS install. Disk I/O counters sit behind IOKit, which needs cgo, so the agent reads the
+same `IOBlockStorageDriver` statistics from `ioreg` and skips mounted disk images.
+Network counters come from the `NET_RT_IFLIST2` routing sysctl (64-bit `if_data64`), limited
+to the `en*` ports. `lo0`, `utun` VPN tunnels, `awdl`/`llw` and `bridge0` are skipped
+because they would count the same traffic twice.
 
 Disk I/O is reported per whole physical disk: partitions and virtual devices (`loop`,
 `dm-*`, `md*`, `zram`) are skipped so stacked devices don't count the same I/O twice. In a

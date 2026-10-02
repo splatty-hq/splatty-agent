@@ -1,0 +1,42 @@
++-o AppleSDXCBlockStorageDevice  <class AppleSDXCBlockStorageDevice, id 0x100000e95, registered, matched, active, busy 0 (0 ms), retain 10>
+  | {
+  |   "Protocol Characteristics" = {"Physical Interconnect"="Secure Digital","Physical Interconnect Location"="Internal"}
+  | }
+  | 
+  +-o IOBlockStorageDriver  <class IOBlockStorageDriver, id 0x100000e97, registered, matched, active, busy 0 (0 ms), retain 6>
+      {
+        "IOClass" = "IOBlockStorageDriver"
+        "Statistics" = {"Operations (Write)"=0,"Latency Time (Write)"=0,"Bytes (Read)"=0,"Errors (Write)"=0,"Total Time (Read)"=0,"Latency Time (Read)"=0,"Retries (Read)"=0,"Errors (Read)"=0,"Total Time (Write)"=0,"Bytes (Write)"=0,"Operations (Read)"=0,"Retries (Write)"=0}
+      }
+      
++-o NS_01@1  <class IOEmbeddedNVMeBlockDevice, id 0x100000b93, registered, matched, active, busy 0 (2887 ms), retain 7>
+  | {
+  |   "Protocol Characteristics" = {"Physical Interconnect"="Apple Fabric","Physical Interconnect Location"="Internal"}
+  | }
+  | 
+  +-o IOBlockStorageDriver  <class IOBlockStorageDriver, id 0x100000bad, registered, matched, active, busy 0 (2869 ms), retain 8>
+    | {
+    |   "IOClass" = "IOBlockStorageDriver"
+    |   "Statistics" = {"Operations (Write)"=452881355,"Latency Time (Write)"=0,"Bytes (Read)"=6549502758912,"Errors (Write)"=0,"Total Time (Read)"=87537287003368,"Latency Time (Read)"=0,"Retries (Read)"=0,"Errors (Read)"=0,"Total Time (Write)"=16462472670621,"Bytes (Write)"=6097090019328,"Operations (Read)"=364074635,"Retries (Write)"=0}
+    | }
+    | 
+    +-o APPLE SSD Media  <class IOMedia, id 0x100000bc5, registered, matched, active, busy 0 (2852 ms), retain 12>
+        {
+          "Whole" = Yes
+          "BSD Name" = "disk0"
+        }
+        
++-o AppleDiskImageDevice@0  <class AppleDiskImageDevice, id 0x100001971, registered, matched, active, busy 0 (9 ms), retain 10>
+  | {
+  |   "Protocol Characteristics" = {"Physical Interconnect"="Virtual Interface","Physical Interconnect Location"="File"}
+  | }
+  | 
+  +-o IOBlockStorageDriver  <class IOBlockStorageDriver, id 0x100001975, registered, matched, active, busy 0 (9 ms), retain 8>
+    | {
+    |   "Statistics" = {"Operations (Write)"=0,"Latency Time (Write)"=0,"Bytes (Read)"=50093661184,"Errors (Write)"=0,"Operations (Read)"=2972703,"Bytes (Write)"=0}
+    | }
+    | 
+    +-o Apple Disk Image Media  <class IOMedia, id 0x100001976, registered, matched, active, busy 0 (9 ms), retain 11>
+        {
+          "BSD Name" = "disk4"
+        }

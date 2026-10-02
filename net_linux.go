@@ -38,19 +38,5 @@ func (n *netCollector) collect() ([]metric, error) {
 	if dt <= 0 {
 		return nil, nil
 	}
-	var out []metric
-	for iface, s := range cur {
-		p, ok := prev[iface]
-		if !ok || s.rx < p.rx || s.tx < p.tx || s.rxPackets < p.rxPackets || s.txPackets < p.txPackets {
-			continue
-		}
-		tags := map[string]string{"iface": iface}
-		out = append(out,
-			metric{Name: "net.rx_bytes_per_sec", Value: float64(s.rx-p.rx) / dt, Tags: tags},
-			metric{Name: "net.tx_bytes_per_sec", Value: float64(s.tx-p.tx) / dt, Tags: tags},
-			metric{Name: "net.rx_packets_per_sec", Value: float64(s.rxPackets-p.rxPackets) / dt, Tags: tags},
-			metric{Name: "net.tx_packets_per_sec", Value: float64(s.txPackets-p.txPackets) / dt, Tags: tags},
-		)
-	}
-	return out, nil
+	return netRates(cur, prev, dt), nil
 }
