@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.2.0](https://github.com/splatty-hq/splatty-agent/compare/v1.1.0...v1.2.0) (2026-10-08)
+
+
+### Features
+
+* collect disk I/O and network rates on macOS ([d4ea83a](https://github.com/splatty-hq/splatty-agent/commit/d4ea83a514a2d6a313c794e62e611fc39a6e07f8))
+* default SPLATTY_URL to https://splatty.app ([4baf8cc](https://github.com/splatty-hq/splatty-agent/commit/4baf8cce33bb8b91cbfd2a9a541870763a080273))
+* report disk I/O and network packet rates ([4ad6d6c](https://github.com/splatty-hq/splatty-agent/commit/4ad6d6c9f86618fc945dd1493591867af7f9c833))
+* stamp builds with the release tag and add --version ([7677b92](https://github.com/splatty-hq/splatty-agent/commit/7677b925cc4c53a801c316b7ef287c074f4f172f))
+
+
+### Bug Fixes
+
+* correct module path so the agent is go-installable ([f5c1b1f](https://github.com/splatty-hq/splatty-agent/commit/f5c1b1f20dbdb299e6417aa69c2b4e32d40b3176))
+* **transport:** report the real build version in the User-Agent ([590354d](https://github.com/splatty-hq/splatty-agent/commit/590354d78e5eda431e2d9aeb25bd8fcfa3ed104c))
+
 ## [1.1.0](https://github.com/splatty-hq/splatty-agent/compare/v1.0.0...v1.1.0) (2026-08-05)
 
 
