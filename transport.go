@@ -36,7 +36,7 @@ func (t *transport) send(b batch) error {
 	req.Header.Set("Authorization", "Bearer "+t.key)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Content-Encoding", "gzip")
-	req.Header.Set("User-Agent", "splatty-agent/0.1")
+	req.Header.Set("User-Agent", "splatty-agent/"+buildVersion())
 
 	resp, err := t.client.Do(req)
 	if err != nil {
